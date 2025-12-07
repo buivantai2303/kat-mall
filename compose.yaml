@@ -1,0 +1,120 @@
+# ============================================================================
+# KATMALL - DOCKER COMPOSE CONFIGURATION
+# Author: tai.buivan@outlook.com
+# Description: Complete development stack with PostgreSQL, Nginx, Fluentd
+# ============================================================================
+
+services:
+  # ==========================================================================
+  # POSTGRESQL DATABASE
+  # ==========================================================================
+  postgres:
+    image: 'postgres:16-alpine'
+    container_name: katmall-postgres
+    environment:
+      POSTGRES_DB: katmall
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/INIT_SCHEMA.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - katmall-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d katmall"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==========================================================================
+  # SPRING BOOT APPLICATION
+  # ==========================================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: katmall-app
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/katmall
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+    ports:
+      - '8080:8080'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - katmall-network
+    # Fluentd logging driver
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: localhost:24224
+        fluentd-async: "true"
+        tag: docker.{{.Name}}
+    restart: unless-stopped
+
+  # ==========================================================================
+  # NGINX REVERSE PROXY (HTTPS)
+  # ==========================================================================
+  nginx:
+    image: nginx:alpine
+    container_name: katmall-nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - app
+    networks:
+      - katmall-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/nginx-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # ==========================================================================
+  # FLUENTD LOG AGGREGATOR
+  # ==========================================================================
+  fluentd:
+    build:
+      context: ./docker/fluentd
+      dockerfile: Dockerfile
+    container_name: katmall-fluentd
+    ports:
+      - '24224:24224'
+      - '24224:24224/udp'
+    volumes:
+      - ./docker/fluentd/conf:/fluentd/etc:ro
+      - nginx_logs:/var/log/nginx:ro
+      - fluentd_logs:/var/log/fluentd
+    networks:
+      - katmall-network
+    restart: unless-stopped
+
+# ============================================================================
+# NETWORKS
+# ============================================================================
+networks:
+  katmall-network:
+    driver: bridge
+
+# ============================================================================
+# VOLUMES
+# ============================================================================
+volumes:
+  postgres_data:
+    name: katmall-postgres-data
+  nginx_logs:
+    name: katmall-nginx-logs
+  fluentd_logs:
+    name: katmall-fluentd-logs
