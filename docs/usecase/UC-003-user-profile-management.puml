@@ -1,0 +1,207 @@
+@startuml User Profile Management Flow
+
+title UC-003: User Profile Management
+
+actor "Authenticated User" as User
+participant "AuthController" as AC
+database "Database" as DB
+
+== Get Current User Endpoint ==
+note over User, AC
+**GET /api/v1/auth/me**
+----
+**Headers:**
+| Header | Value |
+| Authorization | Bearer {accessToken} |
+----
+**Response (200 OK):**
+| Field | Type | Description |
+| id | String | User ID |
+| email | String | User email |
+| fullName | String | User full name |
+| phone | String | Phone number |
+| avatarUrl | String | Avatar URL |
+| emailVerified | Boolean | Email verification status |
+| role | String | User role |
+| createdAt | DateTime | Account creation date |
+| lastLoginAt | DateTime | Last login timestamp |
+----
+**Errors:**
+| Code | HTTP | Description |
+| UNAUTHORIZED | 401 | Not authenticated |
+
+**Use Case:** GetCurrentUserUseCase.execute()
+end note
+
+participant "GetCurrentUserUseCase" as GCU
+participant "UserRepository" as UR
+participant "SecurityContext" as SC
+
+User -> AC: GET /auth/me
+activate AC
+AC -> GCU: execute()
+activate GCU
+
+GCU -> SC: getAuthentication().getPrincipal()
+activate SC
+SC --> GCU: AuthenticatedUser
+deactivate SC
+
+GCU -> UR: findById(userId)
+activate UR
+UR -> DB: SELECT
+UR --> GCU: userModel
+deactivate UR
+
+GCU -> GCU: mapToUserResponse(userModel)
+
+GCU --> AC: UserResponse
+deactivate GCU
+AC --> User: 200 OK
+deactivate AC
+
+== Update Profile Endpoint ==
+note over User, AC
+**PUT /api/v1/auth/me**
+----
+**Headers:**
+| Header | Value |
+| Authorization | Bearer {accessToken} |
+----
+**Request Body:**
+| Field | Type | Required | Description |
+| firstName | String | No | First name |
+| lastName | String | No | Last name |
+| fullName | String | No | Full name (alternative) |
+| phone | String | No | Phone number |
+| avatarUrl | String | No | Avatar URL |
+| birthday | String | No | Birthday (yyyy-MM-dd) |
+| gender | String | No | MALE / FEMALE / OTHER |
+| address | String | No | Address |
+----
+**Response (200 OK):** Updated UserResponse
+
+**Use Case:** UpdateProfileUseCase.execute(UpdateProfileRequest)
+end note
+
+participant "UpdateProfileUseCase" as UPU
+
+User -> AC: PUT /auth/me
+activate AC
+AC -> UPU: execute(request)
+activate UPU
+
+UPU -> SC: getAuthentication().getPrincipal()
+activate SC
+SC --> UPU: AuthenticatedUser
+deactivate SC
+
+UPU -> UR: findById(userId)
+activate UR
+UR --> UPU: userModel
+deactivate UR
+
+UPU -> UPU: request.getEffectiveFullName()
+note right: Combines firstName + lastName
+
+alt fullName provided
+    UPU -> UPU: userModel.updateFullName(fullName)
+end
+alt phone provided
+    UPU -> UPU: userModel.updatePhone(phone)
+end
+alt avatarUrl provided
+    UPU -> UPU: userModel.updateAvatar(avatarUrl)
+end
+
+UPU -> UR: save(userModel)
+activate UR
+UR -> DB: UPDATE
+UR --> UPU: savedUserModel
+deactivate UR
+
+UPU --> AC: UserResponse
+deactivate UPU
+AC --> User: 200 OK
+deactivate AC
+
+== Change Password Endpoint ==
+note over User, AC
+**POST /api/v1/auth/change-password**
+----
+**Headers:**
+| Header | Value |
+| Authorization | Bearer {accessToken} |
+----
+**Request Body:**
+| Field | Type | Required | Description |
+| currentPassword | String | Yes | Current password |
+| newPassword | String | Yes | New password (min 8 chars) |
+| confirmNewPassword | String | Yes | Must match newPassword |
+----
+**Response (200 OK):** Success message
+----
+**Errors:**
+| Code | HTTP | Description |
+| PASSWORD_MISMATCH | 400 | Passwords don't match |
+| PASSWORD_INCORRECT | 400 | Current password wrong |
+
+**Use Case:** ChangePasswordUseCase.execute(ChangePasswordRequest)
+end note
+
+participant "ChangePasswordUseCase" as CPU
+participant "PasswordEncoder" as PE
+
+User -> AC: POST /auth/change-password
+activate AC
+AC -> CPU: execute(request)
+activate CPU
+
+CPU -> CPU: validatePasswordMatch()
+note right: newPassword == confirmNewPassword
+
+CPU -> SC: getAuthentication().getPrincipal()
+CPU -> UR: findById(userId)
+activate UR
+UR --> CPU: userModel
+deactivate UR
+
+CPU -> PE: matches(currentPassword, userModel.passwordHash)
+activate PE
+PE --> CPU: true
+deactivate PE
+
+CPU -> PE: encode(newPassword)
+activate PE
+PE --> CPU: newPasswordHash
+deactivate PE
+
+CPU -> CPU: userModel.changePassword(newPasswordHash)
+
+CPU -> UR: save(userModel)
+activate UR
+UR -> DB: UPDATE
+UR --> CPU: saved
+deactivate UR
+
+CPU --> AC: void
+deactivate CPU
+AC --> User: 200 OK
+deactivate AC
+
+== Use Case Summary ==
+note over AC
+**Profile Management Use Cases:**
+| Use Case | Method | Description |
+| GetCurrentUserUseCase | execute() | Get current user profile |
+| UpdateProfileUseCase | execute(UpdateProfileRequest) | Update profile info |
+| ChangePasswordUseCase | execute(ChangePasswordRequest) | Change password |
+
+**Related DTOs:**
+| DTO | Description |
+| UpdateProfileRequest | Profile update data |
+| ChangePasswordRequest | Password change data |
+| UserResponse | User profile response |
+end note
+
+@enduml

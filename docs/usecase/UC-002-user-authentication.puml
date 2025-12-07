@@ -1,0 +1,188 @@
+@startuml User Authentication Flow
+
+title UC-002: User Authentication (Login, Social Login, Token Refresh)
+
+actor "User" as User
+participant "AuthController" as AC
+database "Database" as DB
+
+== Login Endpoint ==
+note over User, AC
+**POST /api/v1/auth/login**
+----
+**Request Body:**
+| Field | Type | Required | Description |
+| email | String | Yes | User email address |
+| password | String | Yes | User password |
+----
+**Response (200 OK):**
+| Field | Type | Description |
+| accessToken | String | JWT access token |
+| refreshToken | String | JWT refresh token |
+| tokenType | String | "Bearer" |
+| expiresIn | Long | Access token expiration (seconds) |
+| user | UserResponse | User profile data |
+----
+**Errors:**
+| Code | HTTP | Description |
+| LOGIN_FAILED | 401 | Invalid credentials |
+| ACCOUNT_LOCKED | 403 | Account is locked |
+| ACCOUNT_INACTIVE | 403 | Account is disabled |
+
+**Use Case:** LoginUseCase.execute(LoginRequest)
+end note
+
+participant "LoginUseCase" as LU
+participant "UserRepository" as UR
+participant "PasswordEncoder" as PE
+participant "JwtTokenProvider" as JWT
+
+User -> AC: POST /auth/login
+activate AC
+AC -> LU: execute(request)
+activate LU
+
+LU -> UR: findByEmail(email)
+activate UR
+UR -> DB: SELECT
+UR --> LU: userModel
+deactivate UR
+
+LU -> LU: checkAccountStatus()
+note right: LOCKED / INACTIVE check
+
+LU -> PE: matches(password, passwordHash)
+activate PE
+PE --> LU: true
+deactivate PE
+
+LU -> LU: userModel.recordLogin()
+LU -> UR: save(userModel)
+activate UR
+UR -> DB: UPDATE last_login
+UR --> LU: saved
+deactivate UR
+
+LU -> JWT: generateAccessToken(userId, email, role)
+activate JWT
+JWT --> LU: accessToken
+deactivate JWT
+
+LU -> JWT: generateRefreshToken(userId, email)
+activate JWT
+JWT --> LU: refreshToken
+deactivate JWT
+
+LU --> AC: AuthResponse
+deactivate LU
+AC --> User: 200 OK
+deactivate AC
+
+== Social Login Endpoint ==
+note over User, AC
+**POST /api/v1/auth/social**
+----
+**Request Body:**
+| Field | Type | Required | Description |
+| provider | String | Yes | GOOGLE / FACEBOOK / APPLE |
+| providerId | String | Yes | Social provider user ID |
+| email | String | Yes | User email from provider |
+| name | String | Yes | User name from provider |
+| avatarUrl | String | No | Avatar URL from provider |
+----
+**Response (200 OK):** Same as login
+
+**Use Case:** SocialLoginUseCase.execute(SocialLoginRequest)
+end note
+
+participant "SocialLoginUseCase" as SLU
+
+User -> AC: POST /auth/social
+activate AC
+AC -> SLU: execute(request)
+activate SLU
+
+SLU -> SLU: validateProvider()
+note right: GOOGLE, FACEBOOK, APPLE
+
+SLU -> UR: findByEmail(email)
+activate UR
+UR --> SLU: existingUser or empty
+deactivate UR
+
+alt User exists
+    SLU -> SLU: userModel.linkSocialProvider(provider, providerId)
+else New user
+    SLU -> SLU: UserModel.createFromSocialProvider(...)
+end
+
+SLU -> UR: save(userModel)
+activate UR
+UR -> DB: INSERT/UPDATE
+UR --> SLU: savedUserModel
+deactivate UR
+
+SLU -> JWT: generateTokens()
+SLU --> AC: AuthResponse
+deactivate SLU
+AC --> User: 200 OK
+deactivate AC
+
+== Refresh Token Endpoint ==
+note over User, AC
+**POST /api/v1/auth/refresh**
+----
+**Request Body:**
+| Field | Type | Required | Description |
+| refreshToken | String | Yes | JWT refresh token |
+----
+**Response (200 OK):** New tokens
+
+**Use Case:** RefreshTokenUseCase.execute(RefreshTokenRequest)
+end note
+
+participant "RefreshTokenUseCase" as RTU
+
+User -> AC: POST /auth/refresh
+activate AC
+AC -> RTU: execute(request)
+activate RTU
+
+RTU -> JWT: validateToken(refreshToken)
+activate JWT
+JWT --> RTU: valid
+deactivate JWT
+
+RTU -> JWT: getUserIdFromToken(refreshToken)
+activate JWT
+JWT --> RTU: userId
+deactivate JWT
+
+RTU -> UR: findById(userId)
+activate UR
+UR --> RTU: userModel
+deactivate UR
+
+RTU -> JWT: generateAccessToken()
+RTU -> JWT: generateRefreshToken()
+
+RTU --> AC: AuthResponse
+deactivate RTU
+AC --> User: 200 OK
+deactivate AC
+
+== Use Case Summary ==
+note over AC
+**Authentication Use Cases:**
+| Use Case | Method | Description |
+| LoginUseCase | execute(LoginRequest) | Email/password login |
+| SocialLoginUseCase | execute(SocialLoginRequest) | Social provider login |
+| RefreshTokenUseCase | execute(RefreshTokenRequest) | Refresh access token |
+
+**Related Services:**
+| Service | Description |
+| JwtTokenProvider | JWT token generation/validation |
+| PasswordEncoder | Password hashing/verification |
+end note
+
+@enduml

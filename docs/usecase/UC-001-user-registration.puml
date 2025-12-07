@@ -1,0 +1,221 @@
+@startuml User Registration Flow
+
+title UC-001: User Registration with Email/Phone Verification
+
+actor "Guest User" as User
+participant "RegistrationController" as RC
+participant "RegisterUseCase" as RU
+participant "PasswordValidator" as PV
+participant "MemberRegistrationRepository" as MRR
+participant "UserRepository" as UR
+participant "EmailService" as ES
+database "Database" as DB
+
+== Registration Endpoint ==
+note over User, RC
+**POST /api/v1/auth/register**
+----
+**Request Body:**
+| Field | Type | Required | Description |
+| identifier | String | Yes | Email or phone number |
+| password | String | Yes | Min 8 chars, uppercase, lowercase, digit, special |
+| confirmPassword | String | Yes | Must match password |
+----
+**Response (201 Created):**
+| Field | Type | Description |
+| pendingId | String | Registration ID |
+| maskedIdentifier | String | e.g., us***@email.com |
+| expiresAt | DateTime | Token expiration |
+| remainingResendAttempts | Integer | Resend attempts left |
+| message | String | Confirmation message |
+----
+**Errors:**
+| Code | HTTP | Description |
+| IDENTIFIER_ALREADY_REGISTERED | 409 | Email/phone exists |
+| IDENTIFIER_PENDING_VERIFICATION | 409 | Pending verification |
+| PASSWORD_MISMATCH | 400 | Passwords don't match |
+| WEAK_PASSWORD | 400 | Password requirements |
+
+**Use Case:** RegisterUseCase.execute(QuickRegisterRequest)
+end note
+
+User -> RC: POST /auth/register
+activate RC
+RC -> RU: execute(request)
+activate RU
+
+RU -> PV: validateWithConfirmation(password, confirmPassword)
+activate PV
+PV --> RU: validated
+deactivate PV
+
+RU -> RU: detectIdentifierType(identifier)
+note right: EMAIL or PHONE
+
+RU -> UR: existsByEmail/existsByPhone(identifier)
+activate UR
+UR --> RU: false
+deactivate UR
+
+RU -> MRR: findByIdentifier(identifier)
+activate MRR
+MRR --> RU: empty (not found)
+deactivate MRR
+
+RU -> RU: hashPassword(password)
+RU -> MRR: save(memberRegistration)
+activate MRR
+MRR -> DB: INSERT
+MRR --> RU: savedRegistration
+deactivate MRR
+
+RU -> ES: sendVerificationEmail(email, verifyUrl)
+activate ES
+ES --> RU: sent
+deactivate ES
+
+RU --> RC: PendingRegistrationResponse
+deactivate RU
+RC --> User: 201 Created
+deactivate RC
+
+== Verification Endpoint ==
+note over User, RC
+**GET /api/v1/auth/verify?token={token}**
+----
+**Query Parameters:**
+| Param | Type | Required | Description |
+| token | String | Yes | Verification token from email |
+----
+**Response (200 OK):**
+| Field | Type | Description |
+| userId | String | Created user ID |
+| email | String | User email (if email registration) |
+| phone | String | User phone (if phone registration) |
+| message | String | Success message |
+| verified | Boolean | true |
+----
+**Errors:**
+| Code | HTTP | Description |
+| TOKEN_INVALID | 400 | Token not found |
+| TOKEN_EXPIRED | 400 | Token has expired |
+| ALREADY_VERIFIED | 400 | Already verified |
+
+**Use Case:** VerifyRegistrationUseCase.execute(String token)
+**Flow continues to:** POST /api/v1/auth/login
+end note
+
+participant "VerifyRegistrationUseCase" as VU
+
+User -> RC: GET /auth/verify?token=xxx
+activate RC
+RC -> VU: execute(token)
+activate VU
+
+VU -> MRR: findByVerificationToken(token)
+activate MRR
+MRR --> VU: memberRegistration
+deactivate MRR
+
+VU -> VU: registration.verify()
+note right: validates expiration
+
+VU -> VU: createUserFromRegistration()
+VU -> UR: save(newUserModel)
+activate UR
+UR -> DB: INSERT users
+UR --> VU: savedUserModel
+deactivate UR
+
+VU -> MRR: deleteById(registrationId)
+activate MRR
+MRR -> DB: DELETE
+MRR --> VU: deleted
+deactivate MRR
+
+VU -> ES: sendWelcomeEmail(email)
+activate ES
+ES --> VU: sent
+deactivate ES
+
+VU --> RC: VerificationResponse
+deactivate VU
+RC --> User: 200 OK
+deactivate RC
+
+== Resend Verification Endpoint ==
+note over User, RC
+**POST /api/v1/auth/resend-verification**
+----
+**Request Body:**
+| Field | Type | Required | Description |
+| identifier | String | Yes | Email or phone number |
+----
+**Response (200 OK):**
+| Field | Type | Description |
+| pendingId | String | Registration ID |
+| maskedIdentifier | String | Masked identifier |
+| expiresAt | DateTime | New expiration |
+| remainingResendAttempts | Integer | Attempts left |
+| message | String | Confirmation message |
+----
+**Errors:**
+| Code | HTTP | Description |
+| NOT_FOUND | 404 | Registration not found |
+| RESEND_LIMIT_EXCEEDED | 429 | Max attempts reached |
+| ALREADY_VERIFIED | 400 | Already verified |
+
+**Use Case:** ResendVerificationUseCase.execute(ResendVerificationRequest)
+end note
+
+participant "ResendVerificationUseCase" as RSU
+
+User -> RC: POST /auth/resend-verification
+activate RC
+RC -> RSU: execute(request)
+activate RSU
+
+RSU -> MRR: findByIdentifier(identifier)
+activate MRR
+MRR --> RSU: memberRegistration
+deactivate MRR
+
+RSU -> RSU: registration.regenerateToken()
+note right: validates resend limit
+
+RSU -> MRR: save(registration)
+activate MRR
+MRR -> DB: UPDATE
+MRR --> RSU: saved
+deactivate MRR
+
+RSU -> ES: sendVerificationEmail(email, newUrl)
+activate ES
+ES --> RSU: sent
+deactivate ES
+
+RSU --> RC: PendingRegistrationResponse
+deactivate RSU
+RC --> User: 200 OK
+deactivate RC
+
+== Use Case Summary ==
+note over RU
+**Use Cases in Registration Flow:**
+| Use Case | Method | Description |
+| RegisterUseCase | execute(QuickRegisterRequest) | Create pending registration |
+| VerifyRegistrationUseCase | execute(String token) | Verify and create user |
+| ResendVerificationUseCase | execute(ResendVerificationRequest) | Resend email |
+
+**Related Domain Models:**
+| Model | Description |
+| MemberRegistrationModel | Pending registration entity |
+| UserModel | User aggregate root |
+
+**Related Repositories:**
+| Repository | Description |
+| MemberRegistrationRepository | Pending registration persistence |
+| UserRepository | User persistence |
+end note
+
+@enduml
