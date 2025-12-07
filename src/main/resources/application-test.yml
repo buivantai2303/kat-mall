@@ -1,0 +1,51 @@
+# ============================================================================
+# KATMALL - TEST PROFILE CONFIGURATION  
+# Author: tai.buivan@outlook.com
+# Description: Configuration for testing environment
+# ============================================================================
+
+spring:
+  # ==========================================================================
+  # DATASOURCE - H2 in-memory database for tests
+  # ==========================================================================
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+
+  # ==========================================================================
+  # JPA - Auto-create schema for tests
+  # ==========================================================================
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # ==========================================================================
+  # H2 CONSOLE (for debugging tests)
+  # ==========================================================================
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+# ============================================================================
+# JWT - Shorter expiration for tests
+# ============================================================================
+jwt:
+  secret: test-secret-key-for-jwt-token-generation-must-be-at-least-256-bits-long
+  access-token-expiration: 300000       # 5 minutes
+  refresh-token-expiration: 600000      # 10 minutes
+
+# ============================================================================
+# LOGGING - Minimal for tests
+# ============================================================================
+logging:
+  level:
+    root: WARN
+    com.en.katmall.co: DEBUG
+    org.hibernate.SQL: DEBUG

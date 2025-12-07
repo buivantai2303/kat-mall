@@ -1,0 +1,100 @@
+# ============================================================================
+# KATMALL APPLICATION CONFIGURATION
+# Author: tai.buivan@outlook.com
+# Description: Main application properties
+# ============================================================================
+
+spring:
+  application:
+    name: katmall
+
+  # ==========================================================================
+  # DATASOURCE CONFIGURATION
+  # ==========================================================================
+  datasource:
+    url: jdbc:postgresql://localhost:5432/katmall
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+
+  # ==========================================================================
+  # JPA / HIBERNATE
+  # ==========================================================================
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: Asia/Ho_Chi_Minh
+
+  # ==========================================================================
+  # INTERNATIONALIZATION (i18n)
+  # ==========================================================================
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+  # ==========================================================================
+  # JACKSON JSON
+  # ==========================================================================
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+
+# ============================================================================
+# SERVER CONFIGURATION
+# ============================================================================
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# ============================================================================
+# JWT CONFIGURATION
+# ============================================================================
+jwt:
+  secret: katmall-secret-key-for-jwt-token-generation-must-be-at-least-256-bits-long
+  access-token-expiration: 3600000      # 1 hour in milliseconds
+  refresh-token-expiration: 604800000   # 7 days in milliseconds
+
+# ============================================================================
+# LOGGING CONFIGURATION
+# ============================================================================
+logging:
+  level:
+    root: INFO
+    com.en.katmall.co: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# ============================================================================
+# ACTUATOR ENDPOINTS
+# ============================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized

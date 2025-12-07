@@ -1,0 +1,25 @@
+# ============================================================================
+# KATMALL - DOCKER PROFILE CONFIGURATION
+# Author: tai.buivan@outlook.com
+# Description: Configuration overrides for Docker environment
+# ============================================================================
+
+spring:
+  # ==========================================================================
+  # DATASOURCE - Override for Docker network
+  # ==========================================================================
+  datasource:
+    url: jdbc:postgresql://postgres:5432/katmall
+    username: admin
+    password: admin
+
+# ============================================================================
+# LOGGING - JSON format for Fluentd
+# ============================================================================
+logging:
+  level:
+    root: INFO
+    com.en.katmall.co: INFO
+    org.hibernate.SQL: WARN
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd HH:mm:ss.SSS}","level":"%level","thread":"%thread","logger":"%logger{36}","message":"%msg"}%n'
