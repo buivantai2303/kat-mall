@@ -6,8 +6,8 @@ package com.en.katmall.co.identity.application.usecase;
 
 import com.en.katmall.co.identity.application.dto.request.ResendVerificationRequest;
 import com.en.katmall.co.identity.application.dto.response.PendingRegistrationResponse;
-import com.en.katmall.co.identity.domain.model.MemberRegistrationModel;
-import com.en.katmall.co.identity.domain.repository.MemberRegistrationRepository;
+import com.en.katmall.co.identity.domain.model.UserRegistrationModel;
+import com.en.katmall.co.identity.domain.repository.UserRegistrationRepository;
 import com.en.katmall.co.shared.enums.KTypeIdentifier;
 import com.en.katmall.co.shared.exception.DomainException;
 import com.en.katmall.co.shared.infrastructure.config.properties.RegistrationProperties;
@@ -32,7 +32,7 @@ import java.util.Objects;
 @Slf4j
 public class ResendVerificationUseCase {
 
-    private final MemberRegistrationRepository memberRegistrationRepository;
+    private final UserRegistrationRepository userRegistrationRepository;
     private final EmailService emailService;
     private final RegistrationProperties registrationProperties;
 
@@ -53,12 +53,12 @@ public class ResendVerificationUseCase {
         }
 
         // Find registration
-        MemberRegistrationModel registration = memberRegistrationRepository.findByIdentifier(identifier)
+        UserRegistrationModel registration = userRegistrationRepository.findByIdentifier(identifier)
                 .orElseThrow(() -> new DomainException("NOT_FOUND", "error.registration.not.found"));
 
         // Regenerate token
         registration.regenerateToken(registrationProperties.getTokenExpirationHours());
-        MemberRegistrationModel saved = memberRegistrationRepository.save(registration);
+        UserRegistrationModel saved = userRegistrationRepository.save(registration);
 
         // Resend verification
         sendVerification(saved);
@@ -74,7 +74,7 @@ public class ResendVerificationUseCase {
                 .build();
     }
 
-    private void sendVerification(MemberRegistrationModel registration) {
+    private void sendVerification(UserRegistrationModel registration) {
         String verifyUrl = registrationProperties.generateVerifyUrl(registration.getVerificationToken());
 
         if (registration.getIdentifierType() == KTypeIdentifier.EMAIL) {

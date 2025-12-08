@@ -4,7 +4,7 @@
  */
 package com.en.katmall.co.identity.domain.repository;
 
-import com.en.katmall.co.identity.domain.model.MemberRegistrationModel;
+import com.en.katmall.co.identity.domain.model.UserRegistrationModel;
 
 import java.time.Instant;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.Optional;
  * @author tai.buivan
  * @version 1.0
  */
-public interface MemberRegistrationRepository {
+public interface UserRegistrationRepository {
 
     /**
      * Saves a member registration
@@ -25,7 +25,7 @@ public interface MemberRegistrationRepository {
      * @param registration The registration to save
      * @return The saved registration
      */
-    MemberRegistrationModel save(MemberRegistrationModel registration);
+    UserRegistrationModel save(UserRegistrationModel registration);
 
     /**
      * Finds registration by ID
@@ -33,7 +33,7 @@ public interface MemberRegistrationRepository {
      * @param id The registration ID
      * @return Optional containing the registration if found
      */
-    Optional<MemberRegistrationModel> findById(String id);
+    Optional<UserRegistrationModel> findById(String id);
 
     /**
      * Finds registration by identifier (email or phone)
@@ -41,7 +41,7 @@ public interface MemberRegistrationRepository {
      * @param identifier The email or phone
      * @return Optional containing the registration if found
      */
-    Optional<MemberRegistrationModel> findByIdentifier(String identifier);
+    Optional<UserRegistrationModel> findByIdentifier(String identifier);
 
     /**
      * Finds registration by verification token
@@ -49,7 +49,7 @@ public interface MemberRegistrationRepository {
      * @param token The verification token
      * @return Optional containing the registration if found
      */
-    Optional<MemberRegistrationModel> findByVerificationToken(String token);
+    Optional<UserRegistrationModel> findByVerificationToken(String token);
 
     /**
      * Checks if identifier already has pending registration
@@ -79,7 +79,7 @@ public interface MemberRegistrationRepository {
      * @param before Delete registrations created before this time
      * @return List of expired registrations
      */
-    List<MemberRegistrationModel> findExpiredBefore(Instant before);
+    List<UserRegistrationModel> findExpiredBefore(Instant before);
 
     /**
      * Deletes all expired registrations

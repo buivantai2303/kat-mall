@@ -19,7 +19,7 @@ import java.time.Instant;
  * @version 1.0
  */
 @Entity
-@Table(name = "member_registrations", indexes = {
+@Table(name = "user_registrations", indexes = {
         @Index(name = "idx_member_reg_identifier", columnList = "identifier"),
         @Index(name = "idx_member_reg_token", columnList = "verification_token"),
         @Index(name = "idx_member_reg_expires", columnList = "expires_at")
@@ -29,7 +29,7 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberRegistrationJpaEntity {
+public class UserRegistrationJpaEntity {
 
     @Id
     @Column(length = 255)

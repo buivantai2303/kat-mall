@@ -4,7 +4,8 @@
  */
 package com.en.katmall.co.identity.application.dto.request;
 
-import jakarta.validation.constraints.Size;
+import com.en.katmall.co.shared.validation.annotation.KPhone;
+import com.en.katmall.co.shared.validation.annotation.KSize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,31 +27,31 @@ public class UpdateProfileRequest {
     /**
      * User's first name
      */
-    @Size(min = 1, max = 100, message = "{validation.size}")
+    @KSize(min = 1, max = 100, field = "firstName")
     private String firstName;
 
     /**
      * User's last name
      */
-    @Size(min = 1, max = 100, message = "{validation.size}")
+    @KSize(min = 1, max = 100, field = "lastName")
     private String lastName;
 
     /**
      * User's full name (alternative to first/last)
      */
-    @Size(min = 2, max = 200, message = "{validation.size}")
+    @KSize(min = 2, max = 200, field = "fullName")
     private String fullName;
 
     /**
      * User's phone number
      */
-    @Size(max = 20, message = "{validation.max.length}")
+    @KPhone(region = "VN", allowEmpty = true)
     private String phone;
 
     /**
      * User's avatar URL
      */
-    @Size(max = 500, message = "{validation.max.length}")
+    @KSize(max = 500, field = "avatarUrl")
     private String avatarUrl;
 
     /**
@@ -66,7 +67,7 @@ public class UpdateProfileRequest {
     /**
      * User's address
      */
-    @Size(max = 500, message = "{validation.max.length}")
+    @KSize(max = 500, field = "address")
     private String address;
 
     /**

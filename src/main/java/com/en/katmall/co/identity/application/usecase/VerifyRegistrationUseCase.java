@@ -5,10 +5,10 @@
 package com.en.katmall.co.identity.application.usecase;
 
 import com.en.katmall.co.identity.application.dto.response.VerificationResponse;
-import com.en.katmall.co.identity.domain.model.MemberRegistrationModel;
+import com.en.katmall.co.identity.domain.model.UserRegistrationModel;
 import com.en.katmall.co.identity.domain.model.UserModel;
 import com.en.katmall.co.identity.domain.model.valueobject.Email;
-import com.en.katmall.co.identity.domain.repository.MemberRegistrationRepository;
+import com.en.katmall.co.identity.domain.repository.UserRegistrationRepository;
 import com.en.katmall.co.identity.domain.repository.UserRepository;
 import com.en.katmall.co.shared.enums.KTypeIdentifier;
 import com.en.katmall.co.shared.exception.DomainException;
@@ -33,7 +33,7 @@ import java.util.Objects;
 @Slf4j
 public class VerifyRegistrationUseCase {
 
-    private final MemberRegistrationRepository memberRegistrationRepository;
+    private final UserRegistrationRepository userRegistrationRepository;
     private final UserRepository userRepository;
     private final EmailService emailService;
 
@@ -47,7 +47,7 @@ public class VerifyRegistrationUseCase {
         Objects.requireNonNull(token, "Token must not be null");
 
         // Find registration by token
-        MemberRegistrationModel registration = memberRegistrationRepository.findByVerificationToken(token)
+        UserRegistrationModel registration = userRegistrationRepository.findByVerificationToken(token)
                 .orElseThrow(() -> new DomainException("TOKEN_INVALID", "error.registration.token.invalid"));
 
         // Verify (checks expiration)
@@ -58,7 +58,7 @@ public class VerifyRegistrationUseCase {
         UserModel savedUserModel = userRepository.save(userModel);
 
         // Delete member registration
-        memberRegistrationRepository.deleteById(registration.getId());
+        userRegistrationRepository.deleteById(registration.getId());
 
         // Send welcome email
         if (registration.getIdentifierType() == KTypeIdentifier.EMAIL) {
@@ -76,7 +76,7 @@ public class VerifyRegistrationUseCase {
                 .build();
     }
 
-    private UserModel createUserFromRegistration(MemberRegistrationModel registration) {
+    private UserModel createUserFromRegistration(UserRegistrationModel registration) {
         if (registration.getIdentifierType() == KTypeIdentifier.EMAIL) {
             Email email = Email.of(registration.getIdentifier());
             UserModel userModel = UserModel.create("New User", email, registration.getPasswordHash());

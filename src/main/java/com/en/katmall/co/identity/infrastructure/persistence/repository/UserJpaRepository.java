@@ -52,7 +52,7 @@ public class UserJpaRepository implements UserRepository {
     public UserModel save(UserModel userModel) {
         UserJpaEntity entity = mapper.toEntity(userModel);
         UserJpaEntity saved = jpaRepository.save(entity);
-        return mapper.toDomain(saved);
+        return mapper.toModel(saved);
     }
 
     /**
@@ -64,7 +64,7 @@ public class UserJpaRepository implements UserRepository {
     @Override
     public Optional<UserModel> findById(String id) {
         return jpaRepository.findById(id)
-                .map(mapper::toDomain);
+                .map(mapper::toModel);
     }
 
     /**
@@ -77,7 +77,7 @@ public class UserJpaRepository implements UserRepository {
     @Override
     public Optional<UserModel> findByEmail(Email email) {
         return jpaRepository.findByEmail(email.getValue())
-                .map(mapper::toDomain);
+                .map(mapper::toModel);
     }
 
     /**
@@ -101,7 +101,7 @@ public class UserJpaRepository implements UserRepository {
     @Override
     public Optional<UserModel> findActiveByEmail(Email email) {
         return jpaRepository.findActiveByEmail(email.getValue())
-                .map(mapper::toDomain);
+                .map(mapper::toModel);
     }
 
     /**

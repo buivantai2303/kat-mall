@@ -29,7 +29,7 @@ public class UserPersistenceMapper {
      * @param entity JPA entity
      * @return Domain User
      */
-    public UserModel toDomain(UserJpaEntity entity) {
+    public UserModel toModel(UserJpaEntity entity) {
         if (entity == null)
             return null;
 

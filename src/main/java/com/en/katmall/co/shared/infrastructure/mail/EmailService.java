@@ -75,10 +75,10 @@ public class EmailService {
      */
     @Async
     public void sendHtmlEmail(String to, String subject, String templateName, Map<String, Object> variables) {
-        if (!mailProperties.isEnabled()) {
-            log.info("Email disabled. Would send HTML to: {} with template: {}", to, templateName);
-            return;
-        }
+//        if (!mailProperties.isEnabled()) {
+//            log.info("Email disabled. Would send HTML to: {} with template: {}", to, templateName);
+//            return;
+//        }
 
         try {
             Context context = new Context();

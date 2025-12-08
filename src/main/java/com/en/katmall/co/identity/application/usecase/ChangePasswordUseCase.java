@@ -10,7 +10,6 @@ import com.en.katmall.co.identity.domain.repository.UserRepository;
 import com.en.katmall.co.shared.exception.DomainException;
 import com.en.katmall.co.shared.exception.NotFoundException;
 import com.en.katmall.co.shared.exception.ValidationException;
-import com.en.katmall.co.shared.infrastructure.i18n.MessageService;
 import com.en.katmall.co.shared.infrastructure.security.AuthenticatedUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +17,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -32,17 +30,12 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ChangePasswordUseCase {
 
-    private static final String ERROR_UNAUTHORIZED = "UNAUTHORIZED";
-    private static final String MSG_UNAUTHORIZED = "auth.unauthorized";
-    private static final String MSG_PASSWORD_MISMATCH = "validation.password.mismatch";
-    private static final String MSG_PASSWORD_INCORRECT = "auth.password.incorrect";
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final MessageService messageService;
 
     /**
-     * Executes the change password use case
+     * Executes the change password use case.
+     * Password matching is validated by @KFieldsMatch annotation on DTO.
      * 
      * @param request Change password data
      */
@@ -50,22 +43,13 @@ public class ChangePasswordUseCase {
     public void execute(ChangePasswordRequest request) {
         Objects.requireNonNull(request, "Change password request must not be null");
 
-        // Validate password confirmation
-        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
-            throw new ValidationException(
-                    messageService.get(MSG_PASSWORD_MISMATCH),
-                    Map.of("confirmNewPassword", messageService.get(MSG_PASSWORD_MISMATCH)));
-        }
-
         AuthenticatedUser auth = getAuthenticatedUser();
         UserModel userModel = userRepository.findById(auth.getId())
                 .orElseThrow(() -> new NotFoundException("User", auth.getId()));
 
         // Verify current password
         if (!passwordEncoder.matches(request.getCurrentPassword(), userModel.getPasswordHash())) {
-            throw new ValidationException(
-                    messageService.get(MSG_PASSWORD_INCORRECT),
-                    Map.of("currentPassword", messageService.get(MSG_PASSWORD_INCORRECT)));
+            throw new ValidationException("currentPassword", "k.validation.password.incorrect");
         }
 
         // Update password
@@ -79,6 +63,6 @@ public class ChangePasswordUseCase {
         if (principal instanceof AuthenticatedUser) {
             return (AuthenticatedUser) principal;
         }
-        throw new DomainException(ERROR_UNAUTHORIZED, messageService.get(MSG_UNAUTHORIZED));
+        throw new DomainException("UNAUTHORIZED", "k.error.unauthorized");
     }
 }

@@ -72,6 +72,7 @@ public class I18nConfig implements WebMvcConfigurer {
      * Messages are loaded from:
      * <ul>
      * <li>classpath:i18n/messages</li>
+     * <li>classpath:i18n/validation</li>
      * </ul>
      * 
      * <p>
@@ -88,8 +89,10 @@ public class I18nConfig implements WebMvcConfigurer {
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
 
-        // Set base name for message files
-        messageSource.setBasename("classpath:i18n/messages");
+        // Set base names for message files (multiple bundles)
+        messageSource.setBasenames(
+                "classpath:i18n/messages",
+                "classpath:i18n/validation");
 
         // Set default encoding to UTF-8
         messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());

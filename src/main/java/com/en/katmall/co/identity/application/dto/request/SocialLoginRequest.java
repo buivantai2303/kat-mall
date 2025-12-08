@@ -4,8 +4,8 @@
  */
 package com.en.katmall.co.identity.application.dto.request;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import com.en.katmall.co.shared.validation.annotation.KEmail;
+import com.en.katmall.co.shared.validation.annotation.KNotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,19 +27,19 @@ public class SocialLoginRequest {
     /**
      * Social provider code: GOOGLE, FACEBOOK, APPLE
      */
-    @NotBlank(message = "{validation.required}")
+    @KNotBlank(field = "provider")
     private String provider;
 
     /**
      * Access token or ID token from social provider
      */
-    @NotBlank(message = "{validation.required}")
+    @KNotBlank(field = "token")
     private String token;
 
     /**
      * User's email from social provider (optional, may be extracted from token)
      */
-    @Email(message = "{validation.email.invalid}")
+    @KEmail
     private String email;
 
     /**

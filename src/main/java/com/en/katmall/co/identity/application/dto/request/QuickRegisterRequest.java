@@ -4,8 +4,10 @@
  */
 package com.en.katmall.co.identity.application.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import com.en.katmall.co.shared.validation.annotation.KFieldsMatch;
+import com.en.katmall.co.shared.validation.annotation.KNotBlank;
+import com.en.katmall.co.shared.validation.annotation.KPassword;
+import com.en.katmall.co.shared.validation.annotation.KSize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,28 +24,29 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@KFieldsMatch(field = "password", fieldMatch = "confirmPassword")
 public class QuickRegisterRequest {
 
     /**
      * User identifier: email or phone number.
      * Will be automatically detected based on format.
      */
-    @NotBlank(message = "{validation.required}")
-    @Size(max = 255, message = "{validation.max.length}")
+    @KNotBlank(field = "identifier")
+    @KSize(max = 255, field = "identifier")
     private String identifier;
 
     /**
      * User password.
      * Must meet security requirements.
      */
-    @NotBlank(message = "{validation.required}")
-    @Size(min = 8, max = 100, message = "{validation.min.length}")
+    @KNotBlank(field = "password")
+    @KPassword(minLength = 8)
     private String password;
 
     /**
      * Password confirmation.
      * Must match password field.
      */
-    @NotBlank(message = "{validation.required}")
+    @KNotBlank(field = "confirmPassword")
     private String confirmPassword;
 }

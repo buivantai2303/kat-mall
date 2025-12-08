@@ -4,8 +4,9 @@
  */
 package com.en.katmall.co.identity.application.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import com.en.katmall.co.shared.validation.annotation.KFieldsMatch;
+import com.en.katmall.co.shared.validation.annotation.KNotBlank;
+import com.en.katmall.co.shared.validation.annotation.KPassword;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,24 +22,25 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@KFieldsMatch(field = "newPassword", fieldMatch = "confirmNewPassword")
 public class ChangePasswordRequest {
 
     /**
      * Current password for verification
      */
-    @NotBlank(message = "{validation.required}")
+    @KNotBlank(field = "currentPassword")
     private String currentPassword;
 
     /**
      * New password
      */
-    @NotBlank(message = "{validation.required}")
-    @Size(min = 8, max = 100, message = "{validation.min.length}")
+    @KNotBlank(field = "newPassword")
+    @KPassword(minLength = 8)
     private String newPassword;
 
     /**
      * New password confirmation
      */
-    @NotBlank(message = "{validation.required}")
+    @KNotBlank(field = "confirmNewPassword")
     private String confirmNewPassword;
 }

@@ -31,7 +31,7 @@ import java.util.Objects;
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MemberRegistrationModel extends BaseEntity<String> {
+public class UserRegistrationModel extends BaseEntity<String> {
 
     private static final int TOKEN_LENGTH = 32;
     private static final int MAX_RESEND_ATTEMPTS = 3;
@@ -46,8 +46,8 @@ public class MemberRegistrationModel extends BaseEntity<String> {
     private boolean verified;
 
     @Builder
-    private MemberRegistrationModel(String id, String identifier, KTypeIdentifier identifierType,
-            String passwordHash, int expirationHours) {
+    private UserRegistrationModel(String id, String identifier, KTypeIdentifier identifierType,
+                                  String passwordHash, int expirationHours) {
         super(id != null ? id : IdGenerator.generate());
         this.identifier = Objects.requireNonNull(identifier, "identifier must not be null");
         this.identifierType = Objects.requireNonNull(identifierType, "identifierType must not be null");

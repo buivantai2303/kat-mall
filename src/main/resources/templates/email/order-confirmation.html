@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đơn hàng</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f7;
+        }
+
+        .wrapper {
+            width: 100%;
+            background-color: #f4f4f7;
+            padding: 40px 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+
+        .logo-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .body {
+            padding: 40px 30px;
+        }
+
+        .greeting {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .order-status {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 10px 30px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: #fff;
+            font-weight: 600;
+            border-radius: 50px;
+            font-size: 14px;
+        }
+
+        .message {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #4a4a68;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            color: #4facfe;
+            font-weight: 600;
+        }
+
+        .order-card {
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px dashed #e8e8ef;
+        }
+
+        .order-number {
+            font-size: 14px;
+            color: #8c8ca1;
+        }
+
+        .order-number span {
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .order-date {
+            font-size: 14px;
+            color: #8c8ca1;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e8e8ef;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item-image {
+            width: 60px;
+            height: 60px;
+            background: #e8e8ef;
+            border-radius: 8px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 5px;
+        }
+
+        .item-variant {
+            font-size: 13px;
+            color: #8c8ca1;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: #1a1a2e;
+            text-align: right;
+        }
+
+        .item-qty {
+            font-size: 13px;
+            color: #8c8ca1;
+            text-align: right;
+        }
+
+        .order-summary {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #e8e8ef;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #5c5c7a;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #1a1a2e;
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .address-section {
+            margin: 25px 0;
+        }
+
+        .address-title {
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .address-content {
+            background: #f8f9fc;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #5c5c7a;
+            line-height: 1.6;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 35px 0;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: #fff !important;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 50px;
+        }
+
+        .timeline {
+            margin: 30px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0;
+        }
+
+        .timeline-icon {
+            width: 40px;
+            height: 40px;
+            background: #e8e8ef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .timeline-icon.active {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .timeline-content {
+            flex: 1;
+            padding-bottom: 25px;
+            border-left: 2px solid #e8e8ef;
+            margin-left: -35px;
+            padding-left: 50px;
+        }
+
+        .timeline-content h4 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+
+        .timeline-content p {
+            margin: 0;
+            font-size: 13px;
+            color: #8c8ca1;
+        }
+
+        .footer {
+            background: #f8f9fc;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: 13px;
+            color: #8c8ca1;
+            margin: 0 0 15px 0;
+        }
+
+        .copyright {
+            font-size: 12px;
+            color: #a0a0b8;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+                border-radius: 0 !important;
+            }
+
+            .body {
+                padding: 30px 20px !important;
+            }
+
+            .order-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .item-image {
+                margin: 0 0 10px 0;
+            }
+
+            .item-price {
+                text-align: center;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo-icon">📦</div>
+                <div class="logo" th:text="${appName}">KatMall</div>
+            </div>
+
+            <!-- Body -->
+            <div class="body">
+                <h1 class="greeting">Cảm ơn bạn đã đặt hàng! 🎉</h1>
+
+                <div class="order-status">
+                    <span class="status-badge">✓ Đã xác nhận</span>
+                </div>
+
+                <p class="message" style="text-align: center;">
+                    Đơn hàng của bạn đã được tiếp nhận và đang được xử lý.
+                </p>
+
+                <!-- Order Card -->
+                <div class="order-card">
+                    <div class="order-header">
+                        <div class="order-number">
+                            Mã đơn hàng: <span th:text="${orderNumber}">#KM123456</span>
+                        </div>
+                        <div class="order-date" th:text="${orderDate}">08/12/2025</div>
+                    </div>
+
+                    <!-- Items -->
+                    <div th:each="item : ${items}" class="item">
+                        <div class="item-image">📱</div>
+                        <div class="item-details">
+                            <div class="item-name" th:text="${item.name}">Sản phẩm mẫu</div>
+                            <div class="item-variant" th:text="${item.variant}">Màu: Đen, Size: M</div>
+                        </div>
+                        <div>
+                            <div class="item-price" th:text="${item.price}">1.500.000đ</div>
+                            <div class="item-qty" th:text="'x' + ${item.quantity}">x1</div>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="order-summary">
+                        <div class="summary-row">
+                            <span>Tạm tính:</span>
+                            <span th:text="${subtotal}">3.000.000đ</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Phí vận chuyển:</span>
+                            <span th:text="${shippingFee}">30.000đ</span>
+                        </div>
+                        <div class="summary-row" th:if="${discount}">
+                            <span>Giảm giá:</span>
+                            <span style="color: #11998e;" th:text="${discount}">-300.000đ</span>
+                        </div>
+                        <div class="summary-total">
+                            <span>Tổng cộng:</span>
+                            <span th:text="${total}">2.730.000đ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="address-section">
+                    <div class="address-title">📍 Địa chỉ giao hàng</div>
+                    <div class="address-content">
+                        <strong th:text="${shippingName}">Nguyễn Văn A</strong><br>
+                        <span th:text="${shippingPhone}">0901234567</span><br>
+                        <span th:text="${shippingAddress}">123 Đường ABC, Phường XYZ, Quận 1, TP.HCM</span>
+                    </div>
+                </div>
+
+                <!-- Timeline -->
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-icon active">✓</div>
+                        <div class="timeline-content">
+                            <h4>Đơn hàng đã đặt</h4>
+                            <p th:text="${orderDate}">08/12/2025 21:00</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">📋</div>
+                        <div class="timeline-content">
+                            <h4>Đang xử lý</h4>
+                            <p>Chờ đóng gói</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">🚚</div>
+                        <div class="timeline-content">
+                            <h4>Đang giao hàng</h4>
+                            <p>Dự kiến 2-3 ngày</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-container">
+                    <a th:href="${trackingUrl}" class="button">
+                        📋 Theo dõi đơn hàng
+                    </a>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p class="footer-text">
+                    Cần hỗ trợ? Liên hệ hotline: <strong>1900 1234</strong> hoặc email: support@katmall.com
+                </p>
+                <p class="copyright">
+                    © 2025 <span th:text="${appName}">KatMall</span>. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

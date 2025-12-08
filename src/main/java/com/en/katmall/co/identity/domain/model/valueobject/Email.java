@@ -6,6 +6,7 @@ package com.en.katmall.co.identity.domain.model.valueobject;
 
 import com.en.katmall.co.shared.domain.ValueObject;
 import com.en.katmall.co.shared.exception.ValidationException;
+import lombok.Getter;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -17,11 +18,17 @@ import java.util.regex.Pattern;
  * @author tai.buivan
  * @version 1.0
  */
+@Getter
 public final class Email extends ValueObject {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
 
+    /**
+     * -- GETTER --
+     *  Gets the email value
+     *
+     */
     private final String value;
 
     /**
@@ -48,15 +55,6 @@ public final class Email extends ValueObject {
             throw new ValidationException("email", "Invalid email format");
         }
         return new Email(value);
-    }
-
-    /**
-     * Gets the email value
-     * 
-     * @return The email string in lowercase
-     */
-    public String getValue() {
-        return value;
     }
 
     /**

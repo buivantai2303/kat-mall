@@ -28,7 +28,7 @@ spring:
   # ==========================================================================
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
@@ -41,7 +41,7 @@ spring:
   # INTERNATIONALIZATION (i18n)
   # ==========================================================================
   messages:
-    basename: i18n/messages
+    basename: i18n/messages,i18n/validation
     encoding: UTF-8
     fallback-to-system-locale: false
 
@@ -98,3 +98,58 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+
+# ============================================================================
+# MAIL CONFIGURATION
+# ============================================================================
+spring.mail:
+  host: smtp.gmail.com
+  port: 587
+  username: ${MAIL_USERNAME:your-email@gmail.com}
+  password: ${MAIL_PASSWORD:your-app-password}
+  properties:
+    mail:
+      smtp:
+        auth: true
+        starttls:
+          enable: true
+          required: true
+      transport:
+        protocol: smtp
+      debug: false
+
+# ============================================================================
+# THYMELEAF CONFIGURATION (for email templates)
+# ============================================================================
+spring.thymeleaf:
+  prefix: classpath:/templates/
+  suffix: .html
+  mode: HTML
+  encoding: UTF-8
+  cache: true
+  check-template-location: true
+
+# ============================================================================
+# APP PROPERTIES
+# ============================================================================
+app:
+  name: KatMall
+  base-url: ${APP_BASE_URL:http://localhost:8080}
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+
+# ============================================================================
+# MAIL SERVICE PROPERTIES
+# ============================================================================
+mail:
+  enabled: ${MAIL_ENABLED:false}
+  from: ${MAIL_FROM:noreply@katmall.com}
+  from-name: ${MAIL_FROM_NAME:KatMall}
+
+# ============================================================================
+# REGISTRATION PROPERTIES
+# ============================================================================
+registration:
+  verification:
+    expiration-hours: 24
+    max-resend-attempts: 3
+    resend-cooldown-minutes: 2

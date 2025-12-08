@@ -73,7 +73,7 @@ COMMENT ON COLUMN users.lock_reason IS 'Reason for account lock';
 -- Temporary storage during registration before email/phone verification
 -- Records are moved to users table after successful verification
 -- ----------------------------------------------------------------------------
-CREATE TABLE member_registrations (
+CREATE TABLE user_registrations (
     id VARCHAR(255) PRIMARY KEY,                    -- Unique registration identifier
     identifier VARCHAR(255) NOT NULL UNIQUE,        -- Email or phone number
     identifier_type VARCHAR(20) NOT NULL CHECK (identifier_type IN ('EMAIL', 'PHONE')),
@@ -86,14 +86,14 @@ CREATE TABLE member_registrations (
     is_verified BOOLEAN NOT NULL DEFAULT FALSE      -- Verification status
 );
 
-COMMENT ON TABLE member_registrations IS 'Temporary storage for registration pending verification';
-COMMENT ON COLUMN member_registrations.identifier IS 'Email or phone number';
-COMMENT ON COLUMN member_registrations.identifier_type IS 'EMAIL or PHONE';
-COMMENT ON COLUMN member_registrations.password_hash IS 'BCrypt hashed password';
-COMMENT ON COLUMN member_registrations.verification_token IS 'Unique token for email/SMS verification';
-COMMENT ON COLUMN member_registrations.verification_attempts IS 'Number of verification emails/SMS sent';
-COMMENT ON COLUMN member_registrations.expires_at IS 'Token expiration timestamp';
-COMMENT ON COLUMN member_registrations.last_sent_at IS 'Last verification email/SMS sent timestamp';
+COMMENT ON TABLE user_registrations IS 'Temporary storage for registration pending verification';
+COMMENT ON COLUMN user_registrations.identifier IS 'Email or phone number';
+COMMENT ON COLUMN user_registrations.identifier_type IS 'EMAIL or PHONE';
+COMMENT ON COLUMN user_registrations.password_hash IS 'BCrypt hashed password';
+COMMENT ON COLUMN user_registrations.verification_token IS 'Unique token for email/SMS verification';
+COMMENT ON COLUMN user_registrations.verification_attempts IS 'Number of verification emails/SMS sent';
+COMMENT ON COLUMN user_registrations.expires_at IS 'Token expiration timestamp';
+COMMENT ON COLUMN user_registrations.last_sent_at IS 'Last verification email/SMS sent timestamp';
 
 -- ----------------------------------------------------------------------------
 -- 2.3 Administrators Table
@@ -232,9 +232,9 @@ CREATE INDEX idx_users_provider ON users(auth_provider, provider_id);
 CREATE INDEX idx_user_addresses_user_id ON user_addresses(user_id);
 CREATE INDEX idx_token_blacklist_jti ON token_blacklist(token_jti);
 CREATE INDEX idx_token_blacklist_expires ON token_blacklist(expires_at);
-CREATE INDEX idx_member_reg_identifier ON member_registrations(identifier);
-CREATE INDEX idx_member_reg_token ON member_registrations(verification_token);
-CREATE INDEX idx_member_reg_expires ON member_registrations(expires_at);
+CREATE INDEX idx_member_reg_identifier ON user_registrations(identifier);
+CREATE INDEX idx_member_reg_token ON user_registrations(verification_token);
+CREATE INDEX idx_member_reg_expires ON user_registrations(expires_at);
 
 
 -- ============================================================================

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn hàng đang được giao</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f7;
+        }
+
+        .wrapper {
+            width: 100%;
+            background-color: #f4f4f7;
+            padding: 40px 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+
+        .logo-icon {
+            font-size: 70px;
+            margin-bottom: 10px;
+        }
+
+        .body {
+            padding: 40px 30px;
+        }
+
+        .greeting {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a2e;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .message {
+            font-size: 16px;
+            line-height: 1.7;
+            color: #4a4a68;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .tracking-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+            color: #fff;
+        }
+
+        .tracking-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .tracking-number {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+        }
+
+        .carrier {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .carrier span {
+            font-weight: 600;
+        }
+
+        .delivery-info {
+            background: #f8f9fc;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .delivery-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .delivery-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .delivery-label {
+            font-size: 14px;
+            color: #8c8ca1;
+        }
+
+        .delivery-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a2e;
+        }
+
+        .map-placeholder {
+            background: linear-gradient(135deg, #e8e8ef 0%, #f8f9fc 100%);
+            border-radius: 12px;
+            height: 150px;
+            margin: 25px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 35px 0;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: #fff !important;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 50px;
+        }
+
+        .tips {
+            background: #fff8e6;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 25px 0;
+        }
+
+        .tips h4 {
+            margin: 0 0 10px 0;
+            color: #856404;
+            font-size: 16px;
+        }
+
+        .tips ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #856404;
+            font-size: 14px;
+        }
+
+        .tips li {
+            margin-bottom: 5px;
+        }
+
+        .footer {
+            background: #f8f9fc;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .footer-text {
+            font-size: 13px;
+            color: #8c8ca1;
+            margin: 0 0 15px 0;
+        }
+
+        .copyright {
+            font-size: 12px;
+            color: #a0a0b8;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+                border-radius: 0 !important;
+            }
+
+            .body {
+                padding: 30px 20px !important;
+            }
+
+            .tracking-number {
+                font-size: 22px !important;
+                letter-spacing: 2px !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo-icon">🚚</div>
+                <div class="logo" th:text="${appName}">KatMall</div>
+            </div>
+
+            <!-- Body -->
+            <div class="body">
+                <h1 class="greeting">Đơn hàng đang trên đường! 🎉</h1>
+
+                <p class="message">
+                    Đơn hàng <strong th:text="${orderNumber}">#KM123456</strong> đã được giao cho đơn vị vận chuyển.
+                </p>
+
+                <!-- Tracking Card -->
+                <div class="tracking-card">
+                    <div class="tracking-label">Mã vận đơn</div>
+                    <div class="tracking-number" th:text="${trackingNumber}">SPXVN123456789</div>
+                    <div class="carrier">
+                        Đơn vị vận chuyển: <span th:text="${carrierName}">Giao Hàng Nhanh</span>
+                    </div>
+                </div>
+
+                <!-- Delivery Info -->
+                <div class="delivery-info">
+                    <div class="delivery-row">
+                        <span class="delivery-label">📅 Ngày giao dự kiến:</span>
+                        <span class="delivery-value" th:text="${estimatedDelivery}">10/12/2025</span>
+                    </div>
+                    <div class="delivery-row">
+                        <span class="delivery-label">📍 Giao đến:</span>
+                        <span class="delivery-value" th:text="${deliveryAddress}">Quận 1, TP.HCM</span>
+                    </div>
+                    <div class="delivery-row">
+                        <span class="delivery-label">👤 Người nhận:</span>
+                        <span class="delivery-value" th:text="${recipientName}">Nguyễn Văn A</span>
+                    </div>
+                </div>
+
+                <!-- Map Placeholder -->
+                <div class="map-placeholder">🗺️</div>
+
+                <div class="button-container">
+                    <a th:href="${trackingUrl}" class="button">
+                        📍 Theo dõi vận đơn
+                    </a>
+                </div>
+
+                <!-- Tips -->
+                <div class="tips">
+                    <h4>💡 Lưu ý khi nhận hàng:</h4>
+                    <ul>
+                        <li>Kiểm tra kỹ sản phẩm trước khi thanh toán (nếu COD)</li>
+                        <li>Quay video khi mở hàng để làm bằng chứng nếu có vấn đề</li>
+                        <li>Liên hệ hotline nếu không nhận được hàng đúng hẹn</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p class="footer-text">
+                    Hotline: <strong>1900 1234</strong> | Email: support@katmall.com
+                </p>
+                <p class="copyright">
+                    © 2025 <span th:text="${appName}">KatMall</span>. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

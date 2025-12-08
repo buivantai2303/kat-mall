@@ -40,7 +40,7 @@ public class PasswordValidator {
     public void validate(String password) {
         List<String> errors = getValidationErrors(password);
         if (!errors.isEmpty()) {
-            throw new ValidationException("WEAK_PASSWORD", "error.password.weak");
+            throw new ValidationException("password", "k.validation.password.weak");
         }
     }
 
@@ -53,7 +53,7 @@ public class PasswordValidator {
      */
     public void validateWithConfirmation(String password, String confirmPassword) {
         if (!password.equals(confirmPassword)) {
-            throw new ValidationException("PASSWORD_MISMATCH", "error.password.mismatch");
+            throw new ValidationException("confirmPassword", "k.validation.password.mismatch");
         }
         validate(password);
     }
@@ -132,7 +132,7 @@ public class PasswordValidator {
             score += 10;
         }
 
-        return Math.min(score, 100);
+        return score;
     }
 
     /**

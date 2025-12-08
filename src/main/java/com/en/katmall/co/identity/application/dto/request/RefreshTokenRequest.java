@@ -4,7 +4,7 @@
  */
 package com.en.katmall.co.identity.application.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import com.en.katmall.co.shared.validation.annotation.KNotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +25,6 @@ public class RefreshTokenRequest {
     /**
      * Refresh token previously issued
      */
-    @NotBlank(message = "{validation.required}")
+    @KNotBlank(field = "refreshToken")
     private String refreshToken;
 }

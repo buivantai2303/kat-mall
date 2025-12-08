@@ -6,9 +6,9 @@ package com.en.katmall.co.identity.application.usecase;
 
 import com.en.katmall.co.identity.application.dto.request.QuickRegisterRequest;
 import com.en.katmall.co.identity.application.dto.response.PendingRegistrationResponse;
-import com.en.katmall.co.identity.domain.model.MemberRegistrationModel;
+import com.en.katmall.co.identity.domain.model.UserRegistrationModel;
 import com.en.katmall.co.identity.domain.model.valueobject.Email;
-import com.en.katmall.co.identity.domain.repository.MemberRegistrationRepository;
+import com.en.katmall.co.identity.domain.repository.UserRegistrationRepository;
 import com.en.katmall.co.identity.domain.repository.UserRepository;
 import com.en.katmall.co.identity.domain.service.PasswordValidator;
 import com.en.katmall.co.identity.infrastructure.security.BcryptPasswordEncoder;
@@ -36,7 +36,7 @@ import java.util.Objects;
 @Slf4j
 public class RegisterUseCase {
 
-    private final MemberRegistrationRepository memberRegistrationRepository;
+    private final UserRegistrationRepository userRegistrationRepository;
     private final UserRepository userRepository;
     private final BcryptPasswordEncoder passwordEncoder;
     private final PasswordValidator passwordValidator;
@@ -74,14 +74,14 @@ public class RegisterUseCase {
         String passwordHash = passwordEncoder.encode(request.getPassword());
 
         // Create member registration
-        MemberRegistrationModel registration = MemberRegistrationModel.builder()
+        UserRegistrationModel registration = UserRegistrationModel.builder()
                 .identifier(identifier)
                 .identifierType(identifierType)
                 .passwordHash(passwordHash)
                 .expirationHours(registrationProperties.getTokenExpirationHours())
                 .build();
 
-        MemberRegistrationModel saved = memberRegistrationRepository.save(registration);
+        UserRegistrationModel saved = userRegistrationRepository.save(registration);
 
         // Send verification email/SMS
         sendVerification(saved);
@@ -112,9 +112,9 @@ public class RegisterUseCase {
     }
 
     private void checkAndHandlePendingRegistration(String identifier) {
-        memberRegistrationRepository.findByIdentifier(identifier).ifPresent(existing -> {
+        userRegistrationRepository.findByIdentifier(identifier).ifPresent(existing -> {
             if (existing.isExpired()) {
-                memberRegistrationRepository.deleteById(existing.getId());
+                userRegistrationRepository.deleteById(existing.getId());
             } else {
                 throw new DomainException("IDENTIFIER_PENDING_VERIFICATION",
                         "error.registration.pending.verification");
@@ -122,7 +122,7 @@ public class RegisterUseCase {
         });
     }
 
-    private void sendVerification(MemberRegistrationModel registration) {
+    private void sendVerification(UserRegistrationModel registration) {
         String verifyUrl = registrationProperties.generateVerifyUrl(registration.getVerificationToken());
 
         if (registration.getIdentifierType() == KTypeIdentifier.EMAIL) {

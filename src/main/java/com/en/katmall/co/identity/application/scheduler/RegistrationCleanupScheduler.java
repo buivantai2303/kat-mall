@@ -4,7 +4,7 @@
  */
 package com.en.katmall.co.identity.application.scheduler;
 
-import com.en.katmall.co.identity.domain.repository.MemberRegistrationRepository;
+import com.en.katmall.co.identity.domain.repository.UserRegistrationRepository;
 import com.en.katmall.co.shared.infrastructure.config.properties.RegistrationProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,19 +27,19 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 public class RegistrationCleanupScheduler {
 
-    private final MemberRegistrationRepository memberRegistrationRepository;
+    private final UserRegistrationRepository userRegistrationRepository;
     private final RegistrationProperties registrationProperties;
 
     /**
      * Cleans up expired member registrations.
      * Runs every hour.
      */
-    @Scheduled(fixedRate = 3600000) // Every hour
+    @Scheduled(fixedRate = 3600000)
     public void cleanupExpiredRegistrations() {
         Instant cutoffTime = Instant.now()
                 .minus(registrationProperties.getCleanupAfterHours(), ChronoUnit.HOURS);
 
-        int deleted = memberRegistrationRepository.deleteExpiredBefore(cutoffTime);
+        int deleted = userRegistrationRepository.deleteExpiredBefore(cutoffTime);
 
         if (deleted > 0) {
             log.info("Cleaned up {} expired member registrations", deleted);
